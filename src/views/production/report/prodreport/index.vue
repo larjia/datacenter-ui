@@ -120,7 +120,7 @@
 
     <!-- 添加或修改报工对话框 -->
     <el-dialog :title="title" :visible.sync="open" :close-on-click-modal="false" :close-on-press-escape="false" 
-      :width="dialogWidth" class="dialog" top="3vh !important" @close="closeDialog">
+      :width="dialogWidth" class="dialog" top="3vh !important" @close="closeDialog" center>
       <el-form ref="form" size="small" :model="form" :rules="rules" label-width="80px">
         <!-- 表单行-生产日期 -->
         <el-row>
@@ -993,11 +993,11 @@ export default {
   top: 15px;
 }
 
-.app-container ::v-deep .el-dialog__footer {
-  /* padding-left: 25px;
-  padding-right: 25px; */
+/* .app-container ::v-deep .el-dialog__footer {
+  padding-left: 25px;
+  padding-right: 25px;
   text-align: center;
-}
+} */
 
 .el-input-number--small {
   width: 210px;
