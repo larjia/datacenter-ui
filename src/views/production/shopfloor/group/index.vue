@@ -36,6 +36,7 @@
       row-key="id"
       default-expand-all
       border
+      size='small'
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
     >
       <el-table-column prop="dept.deptName"  label="车间"></el-table-column>

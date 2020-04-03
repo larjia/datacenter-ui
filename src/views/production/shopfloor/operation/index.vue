@@ -15,9 +15,9 @@
         <el-select v-model="queryParams.groupId" placeholder="班组" clearable size="small">
           <el-option
             v-for="group in groupOptions"
-            :key="group.groupId"
-            :label="group.groupName"
-            :value="group.groupId"
+            :key="group.id"
+            :label="group.name"
+            :value="group.id"
           />
         </el-select>
       </el-form-item>
@@ -45,16 +45,18 @@
       :data='opList'
       row-key="opId"
       default-expand-all
+      border
+      size='small'
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
     >
-      <el-table-column prop="operationName" label="工序名称" width="200"></el-table-column>
-      <el-table-column prop="group.groupName" label="班组" width="200"></el-table-column>
-      <el-table-column prop="group.dept.deptName" label="车间" width="200"></el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createTime" width="200">
+      <el-table-column prop="group.dept.deptName" label="车间"></el-table-column>
+      <el-table-column prop="group.name" label="班组"></el-table-column>
+      <el-table-column prop="name" label="工序名称"></el-table-column>
+      <!-- <el-table-column label="创建时间" align="center" prop="createTime" width="200">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createTime) }}</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button 
@@ -91,21 +93,21 @@
         </el-col>
         <!-- 班组 -->
         <el-col :span="24">
-          <el-form-item label="班组" prop="groupName">
+          <el-form-item label="班组" prop="groupId">
             <el-select v-model="form.groupId" placeholder="班组" clearable size="small">
               <el-option
                 v-for="group in groupOptions"
-                :key="group.groupId"
-                :label="group.groupName"
-                :value="group.groupId"
+                :key="group.id"
+                :label="group.name"
+                :value="group.id"
               />
             </el-select>
           </el-form-item>
         </el-col>
         <!-- 工序 -->
         <el-col :span="24">
-          <el-form-item label="工序" prop="operationName">
-            <el-input v-model="form.operationName" placeholder="请输入工序名称" />
+          <el-form-item label="工序" prop="name">
+            <el-input v-model="form.name" placeholder="请输入工序名称" />
           </el-form-item>
         </el-col>
       </el-form>
@@ -197,7 +199,7 @@ export default {
     // 表单重置
     reset () {
       this.form = {
-        operationName: undefined,
+        name: undefined,
         groupId: undefined
       }
       this.resetForm('form')
@@ -218,7 +220,7 @@ export default {
     handleUpdate (row) {
       this.reset()
       this.getDeptTreeList()
-      getOperation(row.operationId).then(response => {
+      getOperation(row.id).then(response => {
         this.form = response.data
         this.open = true
         this.title = '修改部门'
@@ -228,7 +230,7 @@ export default {
     submitForm () {
       this.$refs['form'].validate(valid => {
         if (valid) {
-          if (this.form.operationId != undefined) { // 修改
+          if (this.form.id != undefined) { // 修改
             updateOperation(this.form).then(response => {
               if (response.code === 200) {
                 this.msgSuccess('修改成功')
@@ -254,12 +256,12 @@ export default {
     },
     // 删除按钮操作
     handleDelete (row) {
-      this.$confirm('是否确认删除名称为"' + row.operationName + '"的数据项?', '警告', {
+      this.$confirm('是否确认删除名称为"' + row.name + '"的数据项?', '警告', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        return delOperation(row.operationId)
+        return delOperation(row.id)
       }).then(() => {
         this.getOpList()
         this.msgSuccess('删除成功')
