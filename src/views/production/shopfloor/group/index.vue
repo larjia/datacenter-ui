@@ -3,7 +3,7 @@
     <el-form :inline="true">
       <el-form-item label="班组名称">
         <el-input
-          v-model="queryParams.groupName"
+          v-model="queryParams.name"
           placeholder='请输入班组名称'
           clearable
           @keyup.enter.native='handleQuery'
@@ -33,13 +33,14 @@
     <el-table
       v-loading="loading"
       :data="groupList"
-      row-key="groupId"
+      row-key="id"
       default-expand-all
+      border
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
     >
-      <el-table-column prop="groupName" label="班组名称" width="200"></el-table-column>
+      <el-table-column prop="dept.deptName"  label="车间"></el-table-column>
+      <el-table-column prop="name" label="班组名称"></el-table-column>
       <!-- <el-table-column prop="orderNum" label="排序" width="200"></el-table-column> -->
-      <el-table-column prop="dept.deptName"  label="车间" width="200"></el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -73,8 +74,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="24">
-          <el-form-item label="班组" prop="groupName">
-            <el-input v-model="form.groupName" placeholder="请输入班组名称" />
+          <el-form-item label="班组" prop="name">
+            <el-input v-model="form.name" placeholder="请输入班组名称" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -116,7 +117,7 @@ export default {
       open: false,
       // 查询参数
       queryParams: {
-        groupName: undefined,
+        name: undefined,
         deptId: undefined
       },
       // 表单参数
@@ -166,7 +167,7 @@ export default {
     reset () {
       this.form = {
         deptId: undefined,
-        groupName: undefined
+        name: undefined
         // orderNum: undefined
       }
       this.resetForm('form')
@@ -186,7 +187,7 @@ export default {
     handleUpdate (row) {
       this.reset()
       this.getTreeselect()
-      getGroup(row.groupId).then(response => {
+      getGroup(row.id).then(response => {
         this.form = response.data
         this.open = true
         this.title = '修改部门'
@@ -196,7 +197,7 @@ export default {
     submitForm () {
       this.$refs['form'].validate(valid => {
         if (valid) {
-          if (this.form.groupId != undefined) { // 修改
+          if (this.form.id != undefined) { // 修改
             updateGroup(this.form).then(response => {
               if (response.code === 200) {
                 this.msgSuccess('修改成功')
@@ -222,12 +223,12 @@ export default {
     },
     // 删除按钮操作
     handleDelete (row) {
-      this.$confirm('是否确认删除名称为"' + row.groupName + '"的数据项?', '警告', {
+      this.$confirm('是否确认删除名称为"' + row.name + '"的数据项?', '警告', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        return delGroup(row.groupId)
+        return delGroup(row.id)
       }).then(() => {
         this.getList()
         this.msgSuccess('删除成功')
