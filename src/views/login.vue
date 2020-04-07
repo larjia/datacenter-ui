@@ -41,7 +41,7 @@
         </el-input>
       </el-form-item>
 
-      <el-form-item prop="code">
+      <el-form-item prop="code" v-if="showCaptcha">
         <el-input
           v-model="loginForm.code"
           auto-complete="off"
@@ -94,7 +94,8 @@
 <script>
 import { getCodeImg } from '@/api/login'
 import Cookies from 'js-cookie'
-import { encrypt, decrpty } from '@/utils/jsencrypt'
+import { encrypt, decrypt } from '@/utils/jsencrypt'
+import { mapState } from 'vuex'
 
 export default {
   name: 'Login',
@@ -133,8 +134,16 @@ export default {
     }
   },
   created () {
-    this.getCode()
+    if (this.showCaptcha) {
+      this.getCode()
+    }
+    // this.getCode()
     this.getCookie()
+  },
+  computed: {
+    ...mapState({
+      showCaptcha: state => state.settings.showCaptcha
+    })
   },
   methods: {
     getCode () {
@@ -149,7 +158,7 @@ export default {
       const rememberMe = Cookies.get('rememberMe')
       this.loginForm = {
         username: username === undefined ? this.loginForm.username : username,
-        password: password === undefined ? this.loginForm.password : decrpty(password),
+        password: password === undefined ? this.loginForm.password : decrypt(password),
         rememberMe: rememberMe === undefined ? false : Boolean(rememberMe)
       }
     },
@@ -176,8 +185,10 @@ export default {
             .catch(() => {
               // console.log('login error happened')
               this.loading = false
-              // 登录失败,刷新验证码,重新获取验证码
-              this.getCode()
+              // 登录失败,如启用验证码,则刷新验证码,重新获取验证码
+              if (this.showCaptcha) {
+                this.getCode()
+              }
             })
         }
       })
