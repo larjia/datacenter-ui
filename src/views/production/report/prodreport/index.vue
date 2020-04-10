@@ -534,12 +534,12 @@ export default {
         partProjName: [
           { required: true, message: '产品名称不能为空', trigger: 'blur' }
         ],
-        componentName: [
-          { required: true, message: '零件名称不能为空', trigger: 'blur' }
-        ],
-        serialNumber: [
-          { required: true, message: '批序号不能为空', trigger: 'blue' }
-        ],
+        // componentName: [
+        //   { required: true, message: '零件名称不能为空', trigger: 'blur' }
+        // ],
+        // serialNumber: [
+        //   { required: true, message: '批序号不能为空', trigger: 'blue' }
+        // ],
         dept: [
           { required: true, message: '车间部门不能为空', trigger: 'blur' }
         ],
@@ -652,7 +652,7 @@ export default {
     handleAdd () {
       this.isNew = true
       this.reset()
-      this.getPartList() // 产品名称列表
+      this.getPartList(true) // 产品名称列表
       this.getComponentList() // 零件名称列表
       this.getDeptList() // 部门列表
       this.open = true
@@ -746,8 +746,9 @@ export default {
      * 新增或修改页面方法
      */
     // 获取产品名称 物料号
-    getPartList () {
-      listPart().then(response => {
+    getPartList (active) {
+      const query = active ? { status: 'Active' } : {}
+      listPart(query).then(response => {
         this.partOptions = response.rows
       })
     },
