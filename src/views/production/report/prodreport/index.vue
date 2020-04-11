@@ -121,7 +121,7 @@
     <!-- 添加或修改报工对话框 -->
     <el-dialog :title="title" :visible.sync="open" :close-on-click-modal="false" :close-on-press-escape="false" 
       :width="dialogWidth" class="dialog" top="3vh !important" @close="closeDialog" center>
-      <el-form ref="form" size="small" :model="form" :rules="rules" label-width="90px">
+      <el-form ref="form" size="mini" :model="form" :rules="rules" label-width="90px">
         <!-- 表单行-生产日期 -->
         <el-row>
           <el-col :span="8" :xs="{span:24, offset:0}">
@@ -129,7 +129,8 @@
               <el-date-picker
                 v-model="form.prodDate"
                 type="date"
-                size="small"
+                size="mini"
+                style="width:100%"
               />
             </el-form-item>
           </el-col>
@@ -144,7 +145,8 @@
                   step: '00:30',
                   end: '24:00'
                 }"
-                size="small"
+                size="mini"
+                style="width:100%"
                 placeholder="起始时间"
               />
             </el-form-item>
@@ -160,7 +162,8 @@
                   step: '00:30',
                   end: '24:00'
                 }"
-                size="small"
+                size="mini"
+                style="width:100%"
                 placeholder="结束时间"
               />
             </el-form-item>
@@ -175,8 +178,9 @@
                 v-model="form.partProjName" 
                 filterable 
                 clearable
-                size="small" 
-                placeholder="请选择" 
+                size="mini" 
+                placeholder="请选择"
+                style="width:100%"
                 @change="partSelectionChanged">
                 <el-option
                   v-for="item in partOptions"
@@ -191,7 +195,7 @@
             <el-form-item label="ERP编码" prop="partNumber">
               <el-input
                 v-model="form.partNumber"
-                size="small"
+                size="mini"
                 readonly
               />
             </el-form-item>
@@ -201,7 +205,7 @@
         <el-row>
           <el-col :span="8" :xs="{span:24, offset:0}">
             <el-form-item label="零件名称" prop="componentName">
-              <el-select v-model="form.componentName" size="small" placeholder="请选择" clearable>
+              <el-select v-model="form.componentName" size="mini" placeholder="请选择" clearable style="width:100%">
                 <el-option
                   v-for="item in componentOptions"
                   :key="item.dictValue"
@@ -216,7 +220,7 @@
               <el-input
                 v-model="form.serialNumber"
                 clearable
-                size="small"
+                size="mini"
               />
             </el-form-item>
           </el-col>
@@ -226,7 +230,8 @@
         <el-row>
           <el-col :span="8" :xs="{span:24, offset:0}">
             <el-form-item label="生产车间" prop="dept">
-              <el-select v-model="form.dept" placeholder="生产车间" clearable size="small" @change='deptSelectionChanged'>
+              <el-select v-model="form.dept" placeholder="生产车间" clearable size="mini" 
+                style="width:100%" @change='deptSelectionChanged'>
                 <el-option
                   v-for="item in deptOptions"
                   :key="item.deptId"
@@ -238,7 +243,8 @@
           </el-col>
           <el-col :span="8" :xs="{span:24, offset:0}">
             <el-form-item label="班组" prop="group">
-              <el-select v-model="form.group" placeholder="班组" clearable size="small" @change="groupSelectionChanged">
+              <el-select v-model="form.group" placeholder="班组" clearable size="mini" 
+                style="width:100%" @change="groupSelectionChanged">
                 <el-option
                   v-for="item in groupOptions"
                   :key="item.id"
@@ -250,7 +256,8 @@
           </el-col>
           <el-col :span="8" :xs="{span:24, offset:0}">
             <el-form-item label="工序" prop="op">
-              <el-select v-model="form.op" placeholder="工序" clearable size="small" @change="opSelectionChanged">
+              <el-select v-model="form.op" placeholder="工序" clearable size="mini" 
+                style="width:100%" @change="opSelectionChanged">
                 <el-option
                   v-for="item in opOptions"
                   :key="item.id"
@@ -269,7 +276,8 @@
               <el-input-number
                 v-model="form.qtyCompleted"
                 clearable
-                size="small"
+                size="mini"
+                style="width:100%"
               />
             </el-form-item>
           </el-col>
@@ -282,7 +290,8 @@
               <el-input-number
                 v-model="form.qtyRejected"
                 clearable
-                size="small"
+                size="mini"
+                style="width:100%"
               />
             </el-form-item>
           </el-col>
@@ -295,13 +304,14 @@
               <el-input-number
                 v-model="form.qtyScrapped"
                 clearable
-                size="small"
+                size="mini"
+                style="width:100%"
               />
             </el-form-item>
           </el-col>
           <el-col :span="8" :xs="{span:24, offset:0}">
             <el-form-item v-if="showReason" label="不良原因" prop="rejectReason">
-              <el-select v-model="form.rejectReason" placeholder="请选择" clearable size="small" @change="reasonSelectionChanged($event)">
+              <el-select v-model="form.rejectReason" placeholder="请选择" clearable size="mini" @change="reasonSelectionChanged($event)">
                 <el-option
                   v-for="item in reasonOptions"
                   :key="item.id"
@@ -319,7 +329,7 @@
               <el-input
                 v-bind:value='qtyAccepted'
                 clearable
-                size="small"
+                size="mini"
                 readonly
               />
             </el-form-item>
@@ -330,7 +340,7 @@
               <el-input
                 v-bind:value='ftq | perDisp(ftq)'
                 clearable
-                size="small"
+                size="mini"
                 readonly
               />
             </el-form-item>
@@ -341,7 +351,7 @@
               <el-input
                 v-bind:value='ppm'
                 clearable
-                size="small"
+                size="mini"
                 readonly
               />
             </el-form-item>
@@ -356,7 +366,7 @@
                 v-model="form.operator"
                 placeholder="操作员姓名"
                 clearable
-                size="small"
+                size="mini"
               />
             </el-form-item>
           </el-col>
@@ -1000,17 +1010,17 @@ export default {
   text-align: center;
 } */
 
-.el-input-number--small {
+/* .el-input-number--small {
   width: 210px;
-}
+} */
 
 /* .el-dialog {
   margin-top: 3vh !important;
 } */
 
-.el-dialog .el-input {
+/* .el-dialog .el-input {
   width: 210px;
-}
+} */
 
 /* .el-date-editor {
   width: 205px;
