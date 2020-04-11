@@ -201,7 +201,7 @@
         <el-row>
           <el-col :span="8" :xs="{span:24, offset:0}">
             <el-form-item label="零件名称" prop="componentName">
-              <el-select v-model="form.componentName" size="small" placeholder="请选择">
+              <el-select v-model="form.componentName" size="small" placeholder="请选择" clearable>
                 <el-option
                   v-for="item in componentOptions"
                   :key="item.dictValue"
