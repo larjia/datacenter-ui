@@ -239,12 +239,12 @@
             <el-form-item label="ERP编码" prop="partNumber">
               <el-input
                 v-model="form.partNumber"
-                size="mini"
+                size="mini" 
                 readonly
               />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="1" :xs="{span:24, offset:0}" v-if="showAddComp">
             <div class="item-title" @click="addComponent"><i class="el-icon-circle-plus"/></div>
           </el-col>
         </el-row>
@@ -252,7 +252,12 @@
         <!-- 表单行 零件 多个动态 -->
         <el-row v-for='(comp, index) in form.components' :key="index">
           <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="零件名称" prop="component">
+            <el-form-item label="零件名称"
+              :prop="'components.' + index + '.component'" 
+              :rules="{
+                required: true, message: '零件名称不能为空', trigger: 'blur'
+              }"
+            >
               <el-select v-model="form.components[index].component" size="mini" clearable style="width:100%">
                 <el-option
                   v-for="item in componentOptions"
@@ -264,17 +269,22 @@
             </el-form-item>
           </el-col>
           <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="批序号" prop="serialNumber">
+            <el-form-item label="批序号" 
+              :prop="'components.' + index + '.serialNumber'"
+              :rules="{
+                required: true, message: '批序号不能为空', trigger: 'blur'
+              }"
+            >
               <el-input v-model="form.components[index].serialNumber" clearable size="mini" />
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="1">
             <div class="item-title" @click="removeComponent(index)"><i class="el-icon-remove"/></div>
           </el-col>
         </el-row>
 
         <!-- 表单行 零件 -->
-        <el-row>
+        <!-- <el-row>
           <el-col :span="8" :xs="{span:24, offset:0}">
             <el-form-item label="*零件名称" prop="componentName">
               <el-select v-model="form.componentName" size="mini" placeholder="请选择" clearable style="width:100%">
@@ -296,7 +306,7 @@
               />
             </el-form-item>
           </el-col>
-        </el-row>
+        </el-row> -->
 
         <!-- 表单行-完成数 合格数 -->
         <el-row>
@@ -474,7 +484,7 @@ export default {
     // 完成数       : > 0
     // 不良数,报废数: 为空或者>0
     let validLargerThanZero = (rule, value, cb) => {
-      if (value != '') {
+      if (value !== '') {
         if (value <= 0) {
           cb(new Error('完成数不能小于等于0'))
         } else {
@@ -486,7 +496,7 @@ export default {
     }
 
     let validNoLessThanZero = (rule, value, cb) => {
-      if (value != '') {
+      if (value !== '') {
         if (value < 0) {
           cb(new Error('数量不能小于0'))
         } else {
@@ -557,6 +567,8 @@ export default {
       // 是否为新增或修改(false: 修改 true: 新增)
       isNew: false,
       dialogWidth: 0,
+      // 是否显示新增零件按钮
+      showAddComp: false,
       // 表单参数
       form: {
         components: []
@@ -849,6 +861,14 @@ export default {
       this.reasonOptions = []
       this.form.rejectReason = ''
 
+      // 装配班需要输入零件
+      if (group && group === '装配班') {
+        this.showAddComp = true
+      } else {
+        this.showAddComp = false
+        this.form.components = []
+      }
+
       if (group) {
         let groupId = this.groupOptions.find(item => item.name === group).id
         let query = {
@@ -899,13 +919,14 @@ export default {
         qtyCompleted: 0,
         qtyRejected: 0,
         qtyScrapped: 0
-      };
-      this.partOptions = [],
-      this.componentOptions = [],
-      this.deptOptions = [],
-      this.groupOptions = [],
-      this.opOptions = [],
-      this.reasonOptions = [],
+      }
+      this.partOptions = []
+      this.componentOptions = []
+      this.deptOptions = []
+      this.groupOptions = []
+      this.opOptions = []
+      this.reasonOptions = []
+      this.showAddComp = false
       this.resetForm('form')
     },
     // 点击确定按钮
@@ -1082,6 +1103,11 @@ export default {
 
 .el-date-editor+.el-date-editor {
   margin-left: 10px;
+}
+
+.item-title {
+  text-align: center;
+  margin-top: 5px;
 }
 
 /* .el-table__row:hover>td {
