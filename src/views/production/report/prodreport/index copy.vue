@@ -171,6 +171,62 @@
           </el-col>
         </el-row>
 
+        <!-- 表单行-物料号 -->
+        <el-row>
+          <el-col :span="8" :xs="{span:24, offset:0}">
+            <el-form-item label="产品名称" prop="partProjName">
+              <el-select 
+                v-model="form.partProjName" 
+                filterable 
+                clearable
+                size="mini" 
+                placeholder="请选择"
+                style="width:100%"
+                @change="partSelectionChanged">
+                <el-option
+                  v-for="item in partOptions"
+                  :key="item.id"
+                  :label="item.projName"
+                  :value="item.projName">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8" :xs="{span:24, offset:0}">
+            <el-form-item label="ERP编码" prop="partNumber">
+              <el-input
+                v-model="form.partNumber"
+                size="mini"
+                readonly
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row>
+          <el-col :span="8" :xs="{span:24, offset:0}">
+            <el-form-item label="零件名称" prop="componentName">
+              <el-select v-model="form.componentName" size="mini" placeholder="请选择" clearable style="width:100%">
+                <el-option
+                  v-for="item in componentOptions"
+                  :key="item.dictValue"
+                  :label="item.dictLabel"
+                  :value="item.dictLabel">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8" :xs="{span:24, offset:0}">
+            <el-form-item label="批序号" prop="serialNumber">
+              <el-input
+                v-model="form.serialNumber"
+                clearable
+                size="mini"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
         <!-- 表单行-车间班组工序 -->
         <el-row>
           <el-col :span="8" :xs="{span:24, offset:0}">
@@ -210,90 +266,6 @@
                   :value="item.name"
                 />
               </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <!-- 表单行-物料号 -->
-        <el-row>
-          <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="产品名称" prop="partProjName">
-              <el-select 
-                v-model="form.partProjName" 
-                filterable 
-                clearable
-                size="mini" 
-                placeholder="请选择"
-                style="width:100%"
-                @change="partSelectionChanged">
-                <el-option
-                  v-for="item in partOptions"
-                  :key="item.id"
-                  :label="item.projName"
-                  :value="item.projName">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="ERP编码" prop="partNumber">
-              <el-input
-                v-model="form.partNumber"
-                size="mini"
-                readonly
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <div class="item-title" @click="addComponent"><i class="el-icon-circle-plus"/></div>
-          </el-col>
-        </el-row>
-
-        <!-- 表单行 零件 多个动态 -->
-        <el-row v-for='(comp, index) in form.components' :key="index">
-          <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="零件名称" prop="component">
-              <el-select v-model="form.components[index].component" size="mini" clearable style="width:100%">
-                <el-option
-                  v-for="item in componentOptions"
-                  :key="item.dictValue"
-                  :label="item.ditctLabel"
-                  :value="item.dictLabel">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="批序号" prop="serialNumber">
-              <el-input v-model="form.components[index].serialNumber" clearable size="mini" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <div class="item-title" @click="removeComponent(index)"><i class="el-icon-remove"/></div>
-          </el-col>
-        </el-row>
-
-        <!-- 表单行 零件 -->
-        <el-row>
-          <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="*零件名称" prop="componentName">
-              <el-select v-model="form.componentName" size="mini" placeholder="请选择" clearable style="width:100%">
-                <el-option
-                  v-for="item in componentOptions"
-                  :key="item.dictValue"
-                  :label="item.dictLabel"
-                  :value="item.dictLabel">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="批序号" prop="serialNumber">
-              <el-input
-                v-model="form.serialNumber"
-                clearable
-                size="mini"
-              />
             </el-form-item>
           </el-col>
         </el-row>
@@ -558,9 +530,7 @@ export default {
       isNew: false,
       dialogWidth: 0,
       // 表单参数
-      form: {
-        components: []
-      },
+      form: {},
       // 表单校验
       rules: {
         prodDate: [
@@ -611,12 +581,6 @@ export default {
         rejectReason: [
         //   { validator: validRejectReason, trigger: 'blur' }
           { validator: this.validateRejectReason, trigger: 'blur' }
-        ],
-        component: [
-          { required: true, message: '零件名称不能为空', trigger: 'blur' }
-        ],
-        serialNumber: [
-          { required: true, message: '批序号不能为空', trigger: 'blur' }
         ]
       },
     }
@@ -895,7 +859,6 @@ export default {
         endTime: '',
         // partNumber: '', // ERP物料号
         // serialNumber: '', // 批序号
-        components: [],
         qtyCompleted: 0,
         qtyRejected: 0,
         qtyScrapped: 0
@@ -1023,18 +986,6 @@ export default {
       }
       // this.form.rejectReason = ''
       return false
-    },
-    // 动态添加零件
-    addComponent () {
-      // const index = this.form.components.length
-      this.form.components.push({
-        component: '',
-        serialNumber: ''
-      })
-    },
-    // 动态删除零件
-    removeComponent (index) {
-      this.form.components.splice(index, 1)
     }
   }
 }
