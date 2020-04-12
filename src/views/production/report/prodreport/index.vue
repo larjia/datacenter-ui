@@ -95,8 +95,8 @@
       <el-table-column prop="dept" label="车间部门" width="100"></el-table-column>
       <el-table-column prop="group" label="班组" width="110"></el-table-column>
       <el-table-column prop="op" label="工序" width="120"></el-table-column>
-      <el-table-column prop="componentName" label="零件名称" width="120"></el-table-column>
-      <el-table-column prop="serialNumber" label="批序号" width="120"></el-table-column>
+      <!-- <el-table-column prop="componentName" label="零件名称" width="120"></el-table-column> -->
+      <!-- <el-table-column prop="serialNumber" label="批序号" width="120"></el-table-column> -->
       <el-table-column prop="qtyCompleted" label="完成数" width="80"></el-table-column>
       <el-table-column prop="qtyRejected" label="不良数" width="80"></el-table-column>
       <el-table-column prop="qtyScrapped" label="报废数" width="80"></el-table-column>
