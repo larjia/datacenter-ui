@@ -66,6 +66,7 @@
       row-key='id'
       border
       stripe
+      highlight-current-row
       size='mini'
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
       @selection-change="handleSelectionChange"
@@ -991,6 +992,10 @@ export default {
 </script>
 
 <style scoped>
+/* .app-container .el-table--enable-row-hover .el-table__body tr:hover>td {
+  background-color: #212e3e !important;
+} */
+
 .app-container ::v-deep .el-dialog__body {
   padding: 20px 25px 0 25px;
 }
@@ -1030,4 +1035,18 @@ export default {
   margin-left: 10px;
 }
 
+/* .el-table__row:hover>td {
+  background: red !important;
+} */
+
+
+
+
+/* .el-table__body tr:hover>td{
+  background-color: red !important;
+}
+ 
+.el-table__body tr.current-row>td{
+  background-color: blue !important;
+} */
 </style>
