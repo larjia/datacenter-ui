@@ -278,7 +278,7 @@
               <el-input v-model="form.components[index].serialNumber" clearable size="mini" />
             </el-form-item>
           </el-col>
-          <el-col :span="1">
+          <el-col :span="1" v-if="index != 0">
             <div class="item-title" @click="removeComponent(index)"><i class="el-icon-remove"/></div>
           </el-col>
         </el-row>
@@ -867,6 +867,7 @@ export default {
       // 装配班需要输入零件
       if (group && group === '装配班') {
         this.showAddComp = true
+        this.form.components.push({})
       } else {
         this.showAddComp = false
         this.form.components = []
