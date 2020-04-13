@@ -724,6 +724,9 @@ export default {
       const id = row.id || this.ids
       getReportHistById(id).then(response => {
         this.form = response.data
+        if (this.form.group === '装配班') {
+          this.showAddComp = true
+        }
         this.getPartList()
         this.getComponentList()
         return
@@ -820,7 +823,7 @@ export default {
         this.form.partNumber = ''
       }
     },
-    // 获取零件名称俩表
+    // 获取零件名称表
     getComponentList () {
       this.getDicts("prod_component_name").then(response => {
         this.componentOptions = response.data
