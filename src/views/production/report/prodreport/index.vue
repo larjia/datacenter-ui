@@ -72,6 +72,84 @@
       @current-change="handleCurrentChange"
     >
       <!-- <el-table-column type="selection" width="55" align="center" /> -->
+      <el-table-column type="expand">
+        <template slot-scope="props">
+          <el-form label-position="left" inline size="mini" class="demo-table-expand">
+            <el-row>
+              <el-form-item label="生产日期">
+                {{ props.row.prodDate }}
+              </el-form-item>
+              <el-form-item label="报工日期">
+                {{ props.row.reportDate }}
+              </el-form-item>
+              <el-form-item label="产品名称">
+                {{ props.row.partProjName }}
+              </el-form-item>
+              <el-form-item label="物料号">
+                {{ props.row.partNumber }}
+              </el-form-item>
+            </el-row>
+            <el-row>
+              <el-form-item label="车间">
+                {{ props.row.dept }}
+              </el-form-item>
+              <el-form-item label="班组">
+                {{ props.row.group }}
+              </el-form-item>
+              <el-form-item label="工序">
+                {{ props.row.op }}
+              </el-form-item>
+            </el-row>
+            <el-row>
+              <el-form-item label="操作员">
+                {{ props.row.operator }}
+              </el-form-item>
+              <el-form-item label="班次">
+                {{ props.row.shift | shiftDisp }}
+              </el-form-item>
+              <el-form-item label="开始时间">
+                {{ props.row.startTime }}
+              </el-form-item>
+              <el-form-item label="结束时间">
+                {{ props.row.endTime }}
+              </el-form-item>
+            </el-row>
+            <el-row>
+              <el-form-item label="完成数">
+                {{ props.row.qtyCompleted }}
+              </el-form-item>
+              <el-form-item label="不良数">
+                {{ props.row.qtyRejected }}
+              </el-form-item>
+              <el-form-item label="报废数">
+                {{ props.row.qtyScrapped }}
+              </el-form-item>
+              <el-form-item label="合格数">
+                {{ props.row.qtyAccepted }}
+              </el-form-item>
+              <el-form-item label="FTQ">
+                {{ props.row.ftq }}
+              </el-form-item>
+              <el-form-item label="PPM">
+                {{ props.row.ppm }}
+              </el-form-item>
+              <el-form-item label="不良原因">
+                {{ props.row.rejectReason }}
+              </el-form-item>
+            </el-row>
+            <el-row
+              v-for="(item,index) in props.row.components"
+              :key="index">
+              <el-form-item label="零件名称">
+                {{ item.component }}
+              </el-form-item>
+              <el-form-item label="批序号">
+                {{ item.serialNumber }}
+              </el-form-item>
+            </el-row>
+          </el-form>
+        </template>
+      </el-table-column>
       <el-table-column prop="prodDate" label="生产日期" width="110">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.prodDate, '{y}-{m}-{d}') }}</span>
