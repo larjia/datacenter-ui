@@ -1069,7 +1069,6 @@ export default {
 /* .app-container .el-table--enable-row-hover .el-table__body tr:hover>td {
   background-color: #212e3e !important;
 } */
-
 .app-container ::v-deep .el-dialog__body {
   padding: 20px 25px 0 25px;
 }
@@ -1117,9 +1116,6 @@ export default {
 /* .el-table__row:hover>td {
   background: red !important;
 } */
-
-
-
 
 /* .el-table__body tr:hover>td{
   background-color: red !important;
