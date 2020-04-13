@@ -40,14 +40,14 @@
           type="success"
           icon="el-icon-edit"
           size="mini"
-          :disabled='single'
+          :disabled='!isSelected'
           @click="handleUpdate"
         >修改</el-button>
         <el-button
           type="danger"
           icon="el-icon-delete"
           size="mini"
-          :disabled='single'
+          :disabled='!isSelected'
           @click="handleDelete"
         >删除</el-button>
         <el-button
@@ -69,9 +69,9 @@
       highlight-current-row
       size='mini'
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
-      @selection-change="handleSelectionChange"
+      @current-change="handleCurrentChange"
     >
-      <el-table-column type="selection" width="55" align="center" />
+      <!-- <el-table-column type="selection" width="55" align="center" /> -->
       <el-table-column prop="prodDate" label="生产日期" width="110">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.prodDate, '{y}-{m}-{d}') }}</span>
@@ -566,6 +566,9 @@ export default {
       // showReason: false,
       // 是否为新增或修改(false: 修改 true: 新增)
       isNew: false,
+      // 当前行
+      currentRow: null,
+      // 对话框宽度
       dialogWidth: 0,
       // 是否显示新增零件按钮
       showAddComp: false,
@@ -681,6 +684,10 @@ export default {
       // this.form.rejectReason = ''
       // return false
       return this.calcShowReason()
+    },
+    // 是否有当前行选中
+    isSelected () {
+      return this.currentRow == null ? false : true
     }
   },
   methods: {
@@ -690,6 +697,8 @@ export default {
     // 获取生产报工列表
     getReportHistList () {
       this.loading = true
+      // 分页切换重置currentRow
+      this.currentRow = null
       listReportHist(this.queryParams).then(response => {
         this.reportHistList = response.rows
         this.total = response.total
@@ -721,7 +730,8 @@ export default {
     handleUpdate (row) {
       this.isNew = false
       this.reset()
-      const id = row.id || this.ids
+      // const id = row.id || this.ids
+      const id = row.id || this.currentRow.id
       getReportHistById(id).then(response => {
         this.form = response.data
         if (this.form.group === '装配班') {
@@ -779,7 +789,8 @@ export default {
     },
     // 删除按钮操作
     handleDelete (row) {
-      const id = row.id || this.ids
+      // const id = row.id || this.ids
+      const id = row.id || this.currentRow.id
       this.$confirm('是否确认删除?', '警告', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
@@ -1060,6 +1071,10 @@ export default {
     // 动态删除零件
     removeComponent (index) {
       this.form.components.splice(index, 1)
+    },
+    // 当前行改变
+    handleCurrentChange (val) {
+      this.currentRow = val
     }
   }
 }
@@ -1081,6 +1096,11 @@ export default {
 .app-container ::v-deep .el-dialog__headerbtn {
   top: 15px;
 }
+
+/* if use scoped style, need v-deep */
+/* .app-container ::v-deep .el-table--enable-row-hover .el-table__body tr:hover > td {
+	background-color: red;
+} */
 
 /* .app-container ::v-deep .el-dialog__footer {
   padding-left: 25px;
