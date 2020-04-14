@@ -265,7 +265,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="班组" prop="group">
+            <el-form-item label="班组">
               <el-select v-model="form.group" placeholder="班组" clearable size="mini" 
                 style="width:100%" @change="groupSelectionChanged">
                 <el-option
@@ -278,7 +278,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="工序" prop="op">
+            <el-form-item label="工序" ref="op">
               <el-select v-model="form.op" placeholder="工序" clearable size="mini" 
                 style="width:100%" @change="opSelectionChanged">
                 <el-option
@@ -499,8 +499,8 @@
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submit">确 定</el-button>
-        <el-button v-if="isNew" type="success" @click="submitContinue">确定并继续添加</el-button>
+        <el-button type="primary" @click="submit('form')">确 定</el-button>
+        <el-button v-if="isNew" type="success" @click="submitContinue('form')">确定并继续添加</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
@@ -652,7 +652,9 @@ export default {
       showAddComp: false,
       // 表单参数
       form: {
-        components: []
+        components: [],
+        group: '',
+        op: ''
       },
       // 表单校验
       rules: {
@@ -678,10 +680,10 @@ export default {
           { required: true, message: '车间部门不能为空', trigger: 'blur' }
         ],
         group: [
-          { required: true, message: '班组不能为空', trigger: 'blur' }
+          { required: true, message: '班组不能为空', trigger: ['blur'] }
         ],
         op: [
-          { required: true, message: '工序不能为空', trigger: 'blur' }
+          { required: true, message: '工序不能为空', trigger: ['blur'] }
         ],
         qtyCompleted: [
           { required: true, message: '完成数不能为空', trigger: 'change' },
@@ -949,6 +951,7 @@ export default {
     groupSelectionChanged (group) {
       this.opOptions = []
       this.form.op = ''
+      // this.$set(this.form, 'op', '')
       this.needReason = false
       this.reasonOptions = []
       this.form.rejectReason = ''
@@ -975,6 +978,8 @@ export default {
     // 工序选择值发生变化
     opSelectionChanged (op) {
       if (op) {
+        // this.$refs['op'].clearValidate()
+        // this.$validator.errors.remove('op')
         let info = this.opOptions.find(item => item.name === op)
         
         if (info.needReason === '1') {
@@ -994,7 +999,9 @@ export default {
         this.reasonOptions = []
         this.form.rejectReason = ''
       }
+      // this.$refs.op.resetField()
       this.$forceUpdate()
+      // this.$refs.op.clearValidate()
     },
     reasonSelectionChanged () {
       this.$forceUpdate()
@@ -1024,7 +1031,23 @@ export default {
     },
     // 点击确定按钮
     submit () {
-      this.$refs['form'].validate(valid => {
+      if (!this.form.group) {
+        this.$message({
+          showClose: true,
+          message: '班组不能为空',
+          type: 'error'
+        })
+        return
+      }
+      if (!this.form.op) {
+        this.$message({
+          showClose: true,
+          message: '工序不能为空',
+          type: 'error'
+        })
+        return
+      }
+      this.$refs.form.validate(valid => {
         if (valid) {
           if (this.isNew) { // 新增
             this.form.qtyAccepted = this.qtyAccepted
@@ -1070,7 +1093,23 @@ export default {
     },
     // 点击确定并继续添加按钮
     submitContinue () {
-      this.$refs['form'].validate(valid => {
+      if (!this.form.group) {
+        this.$message({
+          showClose: true,
+          message: '班组不能为空',
+          type: 'error'
+        })
+        return
+      }
+      if (!this.form.op) {
+        this.$message({
+          showClose: true,
+          message: '工序不能为空',
+          type: 'error'
+        })
+        return
+      }
+      this.$refs.form.validate(valid => {
         if (valid) {
           // 不再需要,因为下拉框value已经绑定至属性而非对象
           // this.form.partProjName = this.form.partProjName.projName
