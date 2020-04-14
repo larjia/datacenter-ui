@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryForm" ref="queryForm" :inline="true" size="mini" label-width="80px">
+    <el-form :model="queryParams" ref="queryForm" :inline="true" size="mini" label-width="80px">
       <el-row>
         <el-form-item label="字典名称" prop="dictType">
           <el-select v-model="queryParams.dictType" size="mini">
