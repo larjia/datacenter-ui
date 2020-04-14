@@ -1088,9 +1088,9 @@ export default {
             if (response.code === 200) {
               this.msgSuccess('新增成功')
               // this.open = false
-              this.reset()
+              // this.reset()
               this.getReportHistList()
-              // this.handleAdd()
+              this.handleAdd()
             } else {
               this.msgError(response.msg)
             }
