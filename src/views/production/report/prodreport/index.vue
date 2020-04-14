@@ -685,7 +685,7 @@ export default {
         ],
         qtyCompleted: [
           { required: true, message: '完成数不能为空', trigger: 'change' },
-          { validator: validLargerThanZero, trigger: 'change' }
+          { validator: validLargerThanZero, trigger: 'blur' }
         ],
         operator: [
           { required: true, message: '操作员姓名不能为空', trigger: 'blur' }
