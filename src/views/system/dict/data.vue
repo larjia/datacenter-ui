@@ -194,7 +194,7 @@ export default {
       this.currentRow = null
       listData(this.queryParams).then(response => {
         this.dataList = response.rows
-        this.total = resposne.total
+        this.total = response.total
         this.loading = false
       })
     },
@@ -245,6 +245,10 @@ export default {
     /** 提交按钮 */
     submit () {
 
+    },
+    /** 当前行更改 */
+    handleCurrentChange (val) {
+      this.currentRow = val
     }
   }
 }
