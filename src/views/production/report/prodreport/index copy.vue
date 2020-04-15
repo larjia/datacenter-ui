@@ -40,14 +40,14 @@
           type="success"
           icon="el-icon-edit"
           size="mini"
-          :disabled='single'
+          :disabled='!isSelected'
           @click="handleUpdate"
         >修改</el-button>
         <el-button
           type="danger"
           icon="el-icon-delete"
           size="mini"
-          :disabled='single'
+          :disabled='!isSelected'
           @click="handleDelete"
         >删除</el-button>
         <el-button
@@ -69,9 +69,87 @@
       highlight-current-row
       size='mini'
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
-      @selection-change="handleSelectionChange"
+      @current-change="handleCurrentChange"
     >
-      <el-table-column type="selection" width="55" align="center" />
+      <!-- <el-table-column type="selection" width="55" align="center" /> -->
+      <el-table-column type="expand">
+        <template slot-scope="props">
+          <el-form label-position="left" inline size="mini" class="demo-table-expand">
+            <el-row>
+              <el-form-item label="生产日期">
+                {{ props.row.prodDate }}
+              </el-form-item>
+              <el-form-item label="报工日期">
+                {{ props.row.reportDate }}
+              </el-form-item>
+              <el-form-item label="产品名称">
+                {{ props.row.partProjName }}
+              </el-form-item>
+              <el-form-item label="物料号">
+                {{ props.row.partNumber }}
+              </el-form-item>
+            </el-row>
+            <el-row>
+              <el-form-item label="车间">
+                {{ props.row.dept }}
+              </el-form-item>
+              <el-form-item label="班组">
+                {{ props.row.group }}
+              </el-form-item>
+              <el-form-item label="工序">
+                {{ props.row.op }}
+              </el-form-item>
+            </el-row>
+            <el-row>
+              <el-form-item label="操作员">
+                {{ props.row.operator }}
+              </el-form-item>
+              <el-form-item label="班次">
+                {{ props.row.shift | shiftDisp }}
+              </el-form-item>
+              <el-form-item label="开始时间">
+                {{ props.row.startTime }}
+              </el-form-item>
+              <el-form-item label="结束时间">
+                {{ props.row.endTime }}
+              </el-form-item>
+            </el-row>
+            <el-row>
+              <el-form-item label="完成数">
+                {{ props.row.qtyCompleted }}
+              </el-form-item>
+              <el-form-item label="不良数">
+                {{ props.row.qtyRejected }}
+              </el-form-item>
+              <el-form-item label="报废数">
+                {{ props.row.qtyScrapped }}
+              </el-form-item>
+              <el-form-item label="合格数">
+                {{ props.row.qtyAccepted }}
+              </el-form-item>
+              <el-form-item label="FTQ">
+                {{ props.row.ftq }}
+              </el-form-item>
+              <el-form-item label="PPM">
+                {{ props.row.ppm }}
+              </el-form-item>
+              <el-form-item label="不良原因">
+                {{ props.row.rejectReason }}
+              </el-form-item>
+            </el-row>
+            <el-row
+              v-for="(item,index) in props.row.components"
+              :key="index">
+              <el-form-item label="零件名称">
+                {{ item.component }}
+              </el-form-item>
+              <el-form-item label="批序号">
+                {{ item.serialNumber }}
+              </el-form-item>
+            </el-row>
+          </el-form>
+        </template>
+      </el-table-column>
       <el-table-column prop="prodDate" label="生产日期" width="110">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.prodDate, '{y}-{m}-{d}') }}</span>
@@ -95,8 +173,8 @@
       <el-table-column prop="dept" label="车间部门" width="100"></el-table-column>
       <el-table-column prop="group" label="班组" width="110"></el-table-column>
       <el-table-column prop="op" label="工序" width="120"></el-table-column>
-      <el-table-column prop="componentName" label="零件名称" width="120"></el-table-column>
-      <el-table-column prop="serialNumber" label="批序号" width="120"></el-table-column>
+      <!-- <el-table-column prop="componentName" label="零件名称" width="120"></el-table-column> -->
+      <!-- <el-table-column prop="serialNumber" label="批序号" width="120"></el-table-column> -->
       <el-table-column prop="qtyCompleted" label="完成数" width="80"></el-table-column>
       <el-table-column prop="qtyRejected" label="不良数" width="80"></el-table-column>
       <el-table-column prop="qtyScrapped" label="报废数" width="80"></el-table-column>
@@ -171,6 +249,49 @@
           </el-col>
         </el-row>
 
+        <!-- 表单行-车间班组工序 -->
+        <el-row>
+          <el-col :span="8" :xs="{span:24, offset:0}">
+            <el-form-item label="生产车间" prop="dept">
+              <el-select v-model="form.dept" placeholder="生产车间" clearable size="mini" 
+                style="width:100%" @change='deptSelectionChanged'>
+                <el-option
+                  v-for="item in deptOptions"
+                  :key="item.deptId"
+                  :label="item.deptName"
+                  :value="item.deptName"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8" :xs="{span:24, offset:0}">
+            <el-form-item label="班组">
+              <el-select v-model="form.group" placeholder="班组" clearable size="mini" 
+                style="width:100%" @change="groupSelectionChanged">
+                <el-option
+                  v-for="item in groupOptions"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.name"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8" :xs="{span:24, offset:0}">
+            <el-form-item label="工序" ref="op">
+              <el-select v-model="form.op" placeholder="工序" clearable size="mini" 
+                style="width:100%" @change="opSelectionChanged">
+                <el-option
+                  v-for="item in opOptions"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.name"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
         <!-- 表单行-物料号 -->
         <el-row>
           <el-col :span="8" :xs="{span:24, offset:0}">
@@ -196,16 +317,54 @@
             <el-form-item label="ERP编码" prop="partNumber">
               <el-input
                 v-model="form.partNumber"
-                size="mini"
+                size="mini" 
                 readonly
               />
             </el-form-item>
           </el-col>
+          <el-col :span="1" :xs="{span:24, offset:0}" v-if="showAddComp">
+            <div class="item-title" @click="addComponent"><i class="el-icon-circle-plus"/></div>
+          </el-col>
         </el-row>
 
-        <el-row>
+        <!-- 表单行 零件 多个动态 -->
+        <el-row v-for='(comp, index) in form.components' :key="index">
           <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="零件名称" prop="componentName">
+            <el-form-item label="零件名称"
+              :prop="'components.' + index + '.component'" 
+              :rules="{
+                required: true, message: '零件名称不能为空', trigger: 'blur'
+              }"
+            >
+              <el-select v-model="form.components[index].component" size="mini" clearable style="width:100%">
+                <el-option
+                  v-for="item in componentOptions"
+                  :key="item.dictValue"
+                  :label="item.ditctLabel"
+                  :value="item.dictLabel">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8" :xs="{span:24, offset:0}">
+            <el-form-item label="批序号" 
+              :prop="'components.' + index + '.serialNumber'"
+              :rules="{
+                required: true, message: '批序号不能为空', trigger: 'blur'
+              }"
+            >
+              <el-input v-model="form.components[index].serialNumber" clearable size="mini" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="1" v-if="index != 0">
+            <div class="item-title" @click="removeComponent(index)"><i class="el-icon-remove"/></div>
+          </el-col>
+        </el-row>
+
+        <!-- 表单行 零件 -->
+        <!-- <el-row>
+          <el-col :span="8" :xs="{span:24, offset:0}">
+            <el-form-item label="*零件名称" prop="componentName">
               <el-select v-model="form.componentName" size="mini" placeholder="请选择" clearable style="width:100%">
                 <el-option
                   v-for="item in componentOptions"
@@ -225,50 +384,7 @@
               />
             </el-form-item>
           </el-col>
-        </el-row>
-
-        <!-- 表单行-车间班组工序 -->
-        <el-row>
-          <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="生产车间" prop="dept">
-              <el-select v-model="form.dept" placeholder="生产车间" clearable size="mini" 
-                style="width:100%" @change='deptSelectionChanged'>
-                <el-option
-                  v-for="item in deptOptions"
-                  :key="item.deptId"
-                  :label="item.deptName"
-                  :value="item.deptName"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="班组" prop="group">
-              <el-select v-model="form.group" placeholder="班组" clearable size="mini" 
-                style="width:100%" @change="groupSelectionChanged">
-                <el-option
-                  v-for="item in groupOptions"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.name"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="工序" prop="op">
-              <el-select v-model="form.op" placeholder="工序" clearable size="mini" 
-                style="width:100%" @change="opSelectionChanged">
-                <el-option
-                  v-for="item in opOptions"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.name"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
+        </el-row> -->
 
         <!-- 表单行-完成数 合格数 -->
         <el-row>
@@ -310,9 +426,13 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="8" :xs="{span:24, offset:0}">
+          <el-col :span="16" :xs="{span:24, offset:0}">
             <el-form-item v-if="showReason" label="不良原因" prop="rejectReason">
-              <el-select v-model="form.rejectReason" placeholder="请选择" clearable size="mini" @change="reasonSelectionChanged($event)">
+              <el-select v-model="form.rejectReason" multiple placeholder="请选择" 
+                clearable 
+                size="mini" 
+                style="width:100%"
+                @change="reasonSelectionChanged($event)">
                 <el-option
                   v-for="item in reasonOptions"
                   :key="item.id"
@@ -383,8 +503,8 @@
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submit">确 定</el-button>
-        <el-button v-if="isNew" type="success" @click="submitContinue">确定并继续添加</el-button>
+        <el-button type="primary" @click="submit('form')">确 定</el-button>
+        <el-button v-if="isNew" type="success" @click="submitContinue('form')">确定并继续添加</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
@@ -446,7 +566,7 @@ export default {
     // 完成数       : > 0
     // 不良数,报废数: 为空或者>0
     let validLargerThanZero = (rule, value, cb) => {
-      if (value != '') {
+      if (value !== '') {
         if (value <= 0) {
           cb(new Error('完成数不能小于等于0'))
         } else {
@@ -458,7 +578,7 @@ export default {
     }
 
     let validNoLessThanZero = (rule, value, cb) => {
-      if (value != '') {
+      if (value !== '') {
         if (value < 0) {
           cb(new Error('数量不能小于0'))
         } else {
@@ -528,9 +648,18 @@ export default {
       // showReason: false,
       // 是否为新增或修改(false: 修改 true: 新增)
       isNew: false,
+      // 当前行
+      currentRow: null,
+      // 对话框宽度
       dialogWidth: 0,
+      // 是否显示新增零件按钮
+      showAddComp: false,
       // 表单参数
-      form: {},
+      form: {
+        components: [],
+        group: '',
+        op: ''
+      },
       // 表单校验
       rules: {
         prodDate: [
@@ -555,14 +684,14 @@ export default {
           { required: true, message: '车间部门不能为空', trigger: 'blur' }
         ],
         group: [
-          { required: true, message: '班组不能为空', trigger: 'blur' }
+          { required: true, message: '班组不能为空', trigger: ['blur'] }
         ],
         op: [
-          { required: true, message: '工序不能为空', trigger: 'blur' }
+          { required: true, message: '工序不能为空', trigger: ['blur'] }
         ],
         qtyCompleted: [
           { required: true, message: '完成数不能为空', trigger: 'change' },
-          { validator: validLargerThanZero, trigger: 'change' }
+          { validator: validLargerThanZero, trigger: 'blur' }
         ],
         operator: [
           { required: true, message: '操作员姓名不能为空', trigger: 'blur' }
@@ -581,6 +710,12 @@ export default {
         rejectReason: [
         //   { validator: validRejectReason, trigger: 'blur' }
           { validator: this.validateRejectReason, trigger: 'blur' }
+        ],
+        component: [
+          { required: true, message: '零件名称不能为空', trigger: 'blur' }
+        ],
+        serialNumber: [
+          { required: true, message: '批序号不能为空', trigger: 'blur' }
         ]
       },
     }
@@ -633,6 +768,10 @@ export default {
       // this.form.rejectReason = ''
       // return false
       return this.calcShowReason()
+    },
+    // 是否有当前行选中
+    isSelected () {
+      return this.currentRow == null ? false : true
     }
   },
   methods: {
@@ -642,6 +781,8 @@ export default {
     // 获取生产报工列表
     getReportHistList () {
       this.loading = true
+      // 分页切换重置currentRow
+      this.currentRow = null
       listReportHist(this.queryParams).then(response => {
         this.reportHistList = response.rows
         this.total = response.total
@@ -673,9 +814,13 @@ export default {
     handleUpdate (row) {
       this.isNew = false
       this.reset()
-      const id = row.id || this.ids
+      // const id = row.id || this.ids
+      const id = row.id || this.currentRow.id
       getReportHistById(id).then(response => {
         this.form = response.data
+        if (this.form.group === '装配班') {
+          this.showAddComp = true
+        }
         this.getPartList()
         this.getComponentList()
         return
@@ -728,7 +873,8 @@ export default {
     },
     // 删除按钮操作
     handleDelete (row) {
-      const id = row.id || this.ids
+      // const id = row.id || this.ids
+      const id = row.id || this.currentRow.id
       this.$confirm('是否确认删除?', '警告', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
@@ -772,7 +918,7 @@ export default {
         this.form.partNumber = ''
       }
     },
-    // 获取零件名称俩表
+    // 获取零件名称表
     getComponentList () {
       this.getDicts("prod_component_name").then(response => {
         this.componentOptions = response.data
@@ -809,9 +955,19 @@ export default {
     groupSelectionChanged (group) {
       this.opOptions = []
       this.form.op = ''
+      // this.$set(this.form, 'op', '')
       this.needReason = false
       this.reasonOptions = []
       this.form.rejectReason = ''
+
+      // 装配班需要输入零件
+      if (group && group === '装配班') {
+        this.showAddComp = true
+        this.form.components.push({})
+      } else {
+        this.showAddComp = false
+        this.form.components = []
+      }
 
       if (group) {
         let groupId = this.groupOptions.find(item => item.name === group).id
@@ -826,6 +982,8 @@ export default {
     // 工序选择值发生变化
     opSelectionChanged (op) {
       if (op) {
+        // this.$refs['op'].clearValidate()
+        // this.$validator.errors.remove('op')
         let info = this.opOptions.find(item => item.name === op)
         
         if (info.needReason === '1') {
@@ -845,7 +1003,9 @@ export default {
         this.reasonOptions = []
         this.form.rejectReason = ''
       }
+      // this.$refs.op.resetField()
       this.$forceUpdate()
+      // this.$refs.op.clearValidate()
     },
     reasonSelectionChanged () {
       this.$forceUpdate()
@@ -859,26 +1019,49 @@ export default {
         endTime: '',
         // partNumber: '', // ERP物料号
         // serialNumber: '', // 批序号
+        components: [],
         qtyCompleted: 0,
         qtyRejected: 0,
         qtyScrapped: 0
-      };
-      this.partOptions = [],
-      this.componentOptions = [],
-      this.deptOptions = [],
-      this.groupOptions = [],
-      this.opOptions = [],
-      this.reasonOptions = [],
+      }
+      this.partOptions = []
+      this.componentOptions = []
+      this.deptOptions = []
+      this.groupOptions = []
+      this.opOptions = []
+      this.reasonOptions = []
+      this.showAddComp = false
       this.resetForm('form')
     },
     // 点击确定按钮
     submit () {
-      this.$refs['form'].validate(valid => {
+      if (!this.form.group) {
+        this.$message({
+          showClose: true,
+          message: '班组不能为空',
+          type: 'error'
+        })
+        return
+      }
+      if (!this.form.op) {
+        this.$message({
+          showClose: true,
+          message: '工序不能为空',
+          type: 'error'
+        })
+        return
+      }
+      this.$refs.form.validate(valid => {
         if (valid) {
           if (this.isNew) { // 新增
             this.form.qtyAccepted = this.qtyAccepted
             this.form.ppm = this.ppm
             this.form.ftq = this.ftq
+
+            if(this.form.rejectReason.length > 0) {
+              this.form.rejectReason = this.form.rejectReason.join(",")
+            }
+
             if (!this.showReason) {
               this.form.rejectReason = ''
             }
@@ -900,6 +1083,11 @@ export default {
             this.form.qtyAccepted = this.qtyAccepted
             this.form.ppm = this.ppm
             this.form.ftq = this.ftq
+
+            if(this.form.rejectReason.length > 0) {
+              this.form.rejectReason = this.form.rejectReason.join(",")
+            }
+
             if (!this.showReason && this.form.rejectReason) {
               this.form.rejectReason = ''
             }
@@ -919,7 +1107,23 @@ export default {
     },
     // 点击确定并继续添加按钮
     submitContinue () {
-      this.$refs['form'].validate(valid => {
+      if (!this.form.group) {
+        this.$message({
+          showClose: true,
+          message: '班组不能为空',
+          type: 'error'
+        })
+        return
+      }
+      if (!this.form.op) {
+        this.$message({
+          showClose: true,
+          message: '工序不能为空',
+          type: 'error'
+        })
+        return
+      }
+      this.$refs.form.validate(valid => {
         if (valid) {
           // 不再需要,因为下拉框value已经绑定至属性而非对象
           // this.form.partProjName = this.form.partProjName.projName
@@ -933,13 +1137,25 @@ export default {
           //   this.form.rejectReason = this.form.rejectReason.reason
           // }
 
+          if (this.form.rejectReason.length > 0) {
+            this.form.rejectReason = this.form.rejectReason.join(",")
+          }
+
           addReportHist(this.form).then(response => {
             if (response.code === 200) {
               this.msgSuccess('新增成功')
               // this.open = false
-              this.reset()
+              // this.reset()
               this.getReportHistList()
-              // this.handleAdd()
+              const startTime = this.form.startTime
+              const endTime = this.form.endTime
+              const shift = this.form.shift
+              const operator = this.form.operator
+              this.handleAdd()
+              this.form.startTime = startTime
+              this.form.endTime = endTime
+              this.form.shift = shift
+              this.form.operator = operator
             } else {
               this.msgError(response.msg)
             }
@@ -986,6 +1202,22 @@ export default {
       }
       // this.form.rejectReason = ''
       return false
+    },
+    // 动态添加零件
+    addComponent () {
+      // const index = this.form.components.length
+      this.form.components.push({
+        component: '',
+        serialNumber: ''
+      })
+    },
+    // 动态删除零件
+    removeComponent (index) {
+      this.form.components.splice(index, 1)
+    },
+    // 当前行改变
+    handleCurrentChange (val) {
+      this.currentRow = val
     }
   }
 }
@@ -995,7 +1227,6 @@ export default {
 /* .app-container .el-table--enable-row-hover .el-table__body tr:hover>td {
   background-color: #212e3e !important;
 } */
-
 .app-container ::v-deep .el-dialog__body {
   padding: 20px 25px 0 25px;
 }
@@ -1008,6 +1239,11 @@ export default {
 .app-container ::v-deep .el-dialog__headerbtn {
   top: 15px;
 }
+
+/* if use scoped style, need v-deep */
+/* .app-container ::v-deep .el-table--enable-row-hover .el-table__body tr:hover > td {
+	background-color: red;
+} */
 
 /* .app-container ::v-deep .el-dialog__footer {
   padding-left: 25px;
@@ -1035,12 +1271,14 @@ export default {
   margin-left: 10px;
 }
 
+.item-title {
+  text-align: center;
+  margin-top: 5px;
+}
+
 /* .el-table__row:hover>td {
   background: red !important;
 } */
-
-
-
 
 /* .el-table__body tr:hover>td{
   background-color: red !important;
