@@ -1129,7 +1129,15 @@ export default {
               // this.open = false
               // this.reset()
               this.getReportHistList()
+              const startTime = this.form.startTime
+              const endTime = this.form.endTime
+              const shift = this.form.shift
+              const operator = this.form.operator
               this.handleAdd()
+              this.form.startTime = startTime
+              this.form.endTime = endTime
+              this.form.shift = shift
+              this.form.operator = operator
             } else {
               this.msgError(response.msg)
             }
