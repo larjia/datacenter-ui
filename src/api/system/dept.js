@@ -17,6 +17,14 @@ export function listProdDept () {
   })
 }
 
+// 查询所有车间部门列表, 包含班组和工序
+export function listProdDeptAll () {
+  return request({
+    url: '/system/dept/listproddeptall',
+    method: 'get'
+  })
+}
+
 // 查询部门详细
 export function getDept (deptId) {
   return request({

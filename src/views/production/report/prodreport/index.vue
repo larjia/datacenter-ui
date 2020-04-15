@@ -523,7 +523,7 @@ import
 }
 from '@/api/production/report/prodreport'
 
-import { listProdDept } from '@/api/system/dept'
+import { listProdDept, listProdDeptAll } from '@/api/system/dept'
 import { listPart } from '@/api/masterdata/part'
 import { listGroup } from '@/api/production/shopfloor/group/group'
 import { listOperation } from '@/api/production/shopfloor/operation/operation'
@@ -926,7 +926,7 @@ export default {
     },
     // 获取车间部门列表
     getDeptList () {
-      listProdDept().then(response => {
+      listProdDeptAll().then(response => {
         this.deptOptions = response.data
         return response
       })
