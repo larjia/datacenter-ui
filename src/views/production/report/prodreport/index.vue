@@ -426,9 +426,13 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="8" :xs="{span:24, offset:0}">
+          <el-col :span="16" :xs="{span:24, offset:0}">
             <el-form-item v-if="showReason" label="不良原因" prop="rejectReason">
-              <el-select v-model="form.rejectReason" placeholder="请选择" clearable size="mini" @change="reasonSelectionChanged($event)">
+              <el-select v-model="form.rejectReason" multiple placeholder="请选择" 
+                clearable 
+                size="mini" 
+                style="width:100%"
+                @change="reasonSelectionChanged($event)">
                 <el-option
                   v-for="item in reasonOptions"
                   :key="item.id"
@@ -1053,6 +1057,11 @@ export default {
             this.form.qtyAccepted = this.qtyAccepted
             this.form.ppm = this.ppm
             this.form.ftq = this.ftq
+
+            if(this.form.rejectReason.length > 0) {
+              this.form.rejectReason = this.form.rejectReason.join(",")
+            }
+
             if (!this.showReason) {
               this.form.rejectReason = ''
             }
@@ -1074,6 +1083,11 @@ export default {
             this.form.qtyAccepted = this.qtyAccepted
             this.form.ppm = this.ppm
             this.form.ftq = this.ftq
+
+            if(this.form.rejectReason.length > 0) {
+              this.form.rejectReason = this.form.rejectReason.join(",")
+            }
+
             if (!this.showReason && this.form.rejectReason) {
               this.form.rejectReason = ''
             }
@@ -1122,6 +1136,10 @@ export default {
           // if (this.showReason) {
           //   this.form.rejectReason = this.form.rejectReason.reason
           // }
+
+          if (this.form.rejectReason.length > 0) {
+            this.form.rejectReason = this.form.rejectReason.join(",")
+          }
 
           addReportHist(this.form).then(response => {
             if (response.code === 200) {
