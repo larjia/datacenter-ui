@@ -150,14 +150,14 @@
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column prop="prodDate" label="生产日期" width="110">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.prodDate, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
       <el-table-column prop="reportDate" label="报工日期" width="110">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.reportDate, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="prodDate" label="生产日期" width="110">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.prodDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
       <el-table-column prop="partProjName" label="产品名称" width="200"></el-table-column>
