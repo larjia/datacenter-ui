@@ -179,7 +179,7 @@
       <el-table-column prop="qtyRejected" label="不良数" width="80"></el-table-column>
       <el-table-column prop="qtyScrapped" label="报废数" width="80"></el-table-column>
       <el-table-column prop="qtyAccepted" label="合格数" width="80"></el-table-column>
-      <el-table-column prop="rejectReason" label="不良原因" width="250"></el-table-column>
+      <el-table-column prop="rejectReason" label="不良原因" width="250" :show-overflow-tooltip="true"></el-table-column>
       <el-table-column prop="ppm" label="PPM" width="80"></el-table-column>
       <el-table-column prop="ftq" label="FTQ" width="80">
         <template slot-scope="scope">
@@ -253,8 +253,8 @@
         <el-row>
           <el-col :span="8" :xs="{span:24, offset:0}">
             <el-form-item label="生产车间" prop="dept">
-              <el-select v-model="form.dept" placeholder="生产车间" clearable size="mini" 
-                style="width:100%" @change='deptSelectionChanged'>
+              <el-select v-model="form.dept" placeholder="生产车间" size="mini" 
+                style="width:100%" @change='deptChanged'>
                 <el-option
                   v-for="item in deptOptions"
                   :key="item.deptId"
@@ -266,8 +266,8 @@
           </el-col>
           <el-col :span="8" :xs="{span:24, offset:0}">
             <el-form-item label="班组">
-              <el-select v-model="form.group" placeholder="班组" clearable size="mini" 
-                style="width:100%" @change="groupSelectionChanged">
+              <el-select v-model="form.group" placeholder="班组" size="mini" 
+                style="width:100%" @change="groupChanged">
                 <el-option
                   v-for="item in groupOptions"
                   :key="item.id"
@@ -279,8 +279,8 @@
           </el-col>
           <el-col :span="8" :xs="{span:24, offset:0}">
             <el-form-item label="工序" ref="op">
-              <el-select v-model="form.op" placeholder="工序" clearable size="mini" 
-                style="width:100%" @change="opSelectionChanged">
+              <el-select v-model="form.op" placeholder="工序" size="mini" 
+                style="width:100%" @change="opChanged">
                 <el-option
                   v-for="item in opOptions"
                   :key="item.id"
@@ -546,7 +546,7 @@ export default {
      * 工序    : form.op
      * 操作员  : form.operator
      * 班次    : form.shift
-     * 不良原因: form.rejectReason
+     * 不良原因: form.rejectReason 可多选数组形式
      * 完成数  : form.qtyCompleted
      * 不良数  : form.qtyRejected
      * 报废数  : form.qtyScrapped
@@ -642,7 +642,7 @@ export default {
       title: '',
       // 是否显示弹出层
       open: false,
-      // 是否需要选择不良原因
+      // 是否需要不良原因
       needReason: false,
       // 是否需要显示不良原因选择框
       // showReason: false,
@@ -672,7 +672,7 @@ export default {
           { required: true, message: '结束时间不能为空', trigger: 'blur' }
         ],
         partProjName: [
-          { required: true, message: '产品名称不能为空', trigger: 'blur' }
+          { required: true, message: '产品名称不能为空', trigger: ['blur', 'change'] }
         ],
         // componentName: [
         //   { required: true, message: '零件名称不能为空', trigger: 'blur' }
@@ -681,13 +681,13 @@ export default {
         //   { required: true, message: '批序号不能为空', trigger: 'blue' }
         // ],
         dept: [
-          { required: true, message: '车间部门不能为空', trigger: 'blur' }
+          { required: true, message: '车间部门不能为空', trigger: ['blur', 'change'] }
         ],
         group: [
-          { required: true, message: '班组不能为空', trigger: ['blur'] }
+          { required: true, message: '班组不能为空', trigger: ['blur', 'change'] }
         ],
         op: [
-          { required: true, message: '工序不能为空', trigger: ['blur'] }
+          { required: true, message: '工序不能为空', trigger: ['blur', 'change'] }
         ],
         qtyCompleted: [
           { required: true, message: '完成数不能为空', trigger: 'change' },
@@ -709,7 +709,7 @@ export default {
         ],
         rejectReason: [
         //   { validator: validRejectReason, trigger: 'blur' }
-          { validator: this.validateRejectReason, trigger: 'blur' }
+          { validator: this.validateRejectReason, trigger: ['blur', 'change'] }
         ],
         component: [
           { required: true, message: '零件名称不能为空', trigger: 'blur' }
@@ -804,7 +804,7 @@ export default {
     handleAdd () {
       this.isNew = true
       this.reset()
-      this.getPartList(true) // 产品名称列表
+      this.getPartList(true) // 产品名称列表 true代表仅获取Active的产品
       this.getComponentList() // 零件名称列表
       this.getDeptList() // 部门列表
       this.open = true
@@ -909,15 +909,6 @@ export default {
         this.partOptions = response.rows
       })
     },
-    // 产品名称选中值发生变化
-    partSelectionChanged (part) {
-      if (part) {
-        let info = this.partOptions.find(item => item.projName === part)
-        this.form.partNumber = info.number
-      } else {
-        this.form.partNumber = ''
-      }
-    },
     // 获取零件名称表
     getComponentList () {
       this.getDicts("prod_component_name").then(response => {
@@ -931,82 +922,169 @@ export default {
         return response
       })
     },
-    // 部门选择值发生变化
-    deptSelectionChanged (dept) {
-      this.groupOptions = []
-      this.form.group = ''
-      this.opOptions = []
-      this.form.op = ''
-      this.needReason = false
-      this.reasonOptions = []
-      this.form.rejectReason = ''
+    // 获取不良原因列表
+    // getReasonList () {
 
-      if (dept) {
-        let deptId = this.deptOptions.find(item => item.deptName === dept).deptId
-        let query = {
-          deptId: deptId
-        }
-        listGroup(query).then(response => {
-          this.groupOptions = response.rows
-        })
+    // },
+    // 产品名称选中值发生变化
+    partSelectionChanged (part) {
+      if (part) {
+        let info = this.partOptions.find(item => item.projName === part)
+        this.form.partNumber = info.number
+      } else {
+        this.form.partNumber = ''
       }
     },
-    // 班组选择值发生变化
-    groupSelectionChanged (group) {
-      this.opOptions = []
-      this.form.op = ''
-      // this.$set(this.form, 'op', '')
-      this.needReason = false
-      this.reasonOptions = []
-      this.form.rejectReason = ''
+    // 部门选择值发生变化
+    deptChanged (deptName) {
+      // 加载班组options
+      this.fillGroupOptions(deptName)
+      // 表单班组参数清空
+      this.form.group = ''
 
-      // 装配班需要输入零件
-      if (group && group === '装配班') {
+      // 清空工序options
+      this.opOptions = []
+      // 表单工序参数清空
+      this.form.op = ''
+
+      // 是否需要不良原因=false
+      this.needReason = false
+      // 清空不良原因options
+      this.reasonOptions = []
+      // 表单不良原因参数清空
+      this.form.rejectReason = []
+
+      // this.reasonOptions = []
+      // if (dept) {
+      //   let deptId = this.deptOptions.find(item => item.deptName === dept).deptId
+      //   let query = {
+      //     deptId: deptId
+      //   }
+      //   listGroup(query).then(response => {
+      //     this.groupOptions = response.rows
+      //   })
+      // }
+    },
+    // deptChanged (dept) {
+    //   this.groupOptions = []
+    //   this.form.group = ''
+    //   this.opOptions = []
+    //   this.form.op = ''
+    //   this.needReason = false
+    //   this.reasonOptions = []
+    //   this.form.rejectReason = ''
+
+    //   if (dept) {
+    //     let deptId = this.deptOptions.find(item => item.deptName === dept).deptId
+    //     let query = {
+    //       deptId: deptId
+    //     }
+    //     listGroup(query).then(response => {
+    //       this.groupOptions = response.rows
+    //     })
+    //   }
+    // },
+    fillGroupOptions (deptName) {
+      const dept = this.deptOptions.find(item => item.deptName === deptName)
+      this.groupOptions = dept.groups
+    },
+    // 班组选择值发生变化
+    groupChanged (groupName) {
+      // 加载工序options
+      const group = this.groupOptions.find(item => item.name === groupName)
+      this.opOptions = group.ops
+      // 表单工序参数清空
+      this.form.op = ''
+
+      // 是否需要不良原因=false
+      this.needReason = false
+      // 清空不良原因options
+      this.reasonOptions = []
+      // 表单不良原因参数清空
+      this.form.rejectReason = []
+
+      // 是否需要汇报零件列表比如装配班
+      if (group.needComp === '1') {
         this.showAddComp = true
         this.form.components.push({})
       } else {
         this.showAddComp = false
         this.form.components = []
       }
+    },
+    // fillOpOptions (groupName) {
+    //   const group = this.groupOptions.find(item =>item.name === groupName)
+    //   this.opOptions = group.ops
+    // },
+    // groupSelectionChanged (group) {
+    //   this.opOptions = []
+    //   this.form.op = ''
+    //   // this.$set(this.form, 'op', '')
+    //   this.needReason = false
+    //   this.reasonOptions = []
+    //   this.form.rejectReason = ''
 
-      if (group) {
-        let groupId = this.groupOptions.find(item => item.name === group).id
-        let query = {
-          groupId: groupId
-        }
-        listOperation(query).then(response => {
-          this.opOptions = response.rows
-        })
-      }
-    },
+    //   // 装配班需要输入零件
+    //   if (group && group === '装配班') {
+    //     this.showAddComp = true
+    //     this.form.components.push({})
+    //   } else {
+    //     this.showAddComp = false
+    //     this.form.components = []
+    //   }
+
+    //   if (group) {
+    //     let groupId = this.groupOptions.find(item => item.name === group).id
+    //     let query = {
+    //       groupId: groupId
+    //     }
+    //     listOperation(query).then(response => {
+    //       this.opOptions = response.rows
+    //     })
+    //   }
+    // },
     // 工序选择值发生变化
-    opSelectionChanged (op) {
-      if (op) {
-        // this.$refs['op'].clearValidate()
-        // this.$validator.errors.remove('op')
-        let info = this.opOptions.find(item => item.name === op)
-        
-        if (info.needReason === '1') {
-          this.needReason = true
-        } else {
-          this.needReason = false
-        }
-        let query = {
-          opId: info.id
-        }
-        listReason(query).then(response => {
-          this.reasonOptions = response.rows
-          this.form.rejectReason = ''
-        })
-      } else {
-        this.needReason = false
-        this.reasonOptions = []
-        this.form.rejectReason = ''
+    opChanged (opName) {
+      // 设置是否需要不良原因needReason
+      const op = this.opOptions.find(item => item.name === opName)
+      // 是否需要不良原因
+      this.needReason = (op.needReason === '1') ? true : false
+      if (this.needReason) {
+        // 加载原因列表
+        this.reasonOptions = op.rejectReasons
       }
-      // this.$refs.op.resetField()
+      // 清空不良原因
+      this.form.rejectReason = []
+
       this.$forceUpdate()
-      // this.$refs.op.clearValidate()
     },
+    // opSelectionChanged (op) {
+    //   if (op) {
+    //     // this.$refs['op'].clearValidate()
+    //     // this.$validator.errors.remove('op')
+    //     let info = this.opOptions.find(item => item.name === op)
+        
+    //     if (info.needReason === '1') {
+    //       this.needReason = true
+    //     } else {
+    //       this.needReason = false
+    //     }
+    //     let query = {
+    //       opId: info.id
+    //     }
+    //     listReason(query).then(response => {
+    //       this.reasonOptions = response.rows
+    //       this.form.rejectReason = ''
+    //     })
+    //   } else {
+    //     this.needReason = false
+    //     this.reasonOptions = []
+    //     this.form.rejectReason = ''
+    //   }
+    //   // this.$refs.op.resetField()
+    //   this.$forceUpdate()
+    //   // this.$refs.op.clearValidate()
+    // },
     reasonSelectionChanged () {
       this.$forceUpdate()
     },
@@ -1017,9 +1095,8 @@ export default {
         shift: '0', // 默认白班
         startTime: '',
         endTime: '',
-        // partNumber: '', // ERP物料号
-        // serialNumber: '', // 批序号
         components: [],
+        rejectReason: [],
         qtyCompleted: 0,
         qtyRejected: 0,
         qtyScrapped: 0
@@ -1058,16 +1135,12 @@ export default {
             this.form.ppm = this.ppm
             this.form.ftq = this.ftq
 
-            if(this.form.rejectReason.length > 0) {
-              this.form.rejectReason = this.form.rejectReason.join(",")
-            }
-
-            if (!this.showReason) {
-              this.form.rejectReason = ''
-            }
-            // if (this.showReason) {
-            //   this.form.rejectReason = this.form.rejectReason.reason
+            this.form.rejectReason = this.form.rejectReason.join(",")
+            
+            // if (!this.showReason) {
+            //   this.form.rejectReason = ''
             // }
+            // this.form.rejectReason = this.form.rejectReason.reason
 
             addReportHist(this.form).then(response => {
               if (response.code === 200) {
@@ -1084,13 +1157,11 @@ export default {
             this.form.ppm = this.ppm
             this.form.ftq = this.ftq
 
-            if(this.form.rejectReason.length > 0) {
-              this.form.rejectReason = this.form.rejectReason.join(",")
-            }
+            this.form.rejectReason = this.form.rejectReason.join(",")
 
-            if (!this.showReason && this.form.rejectReason) {
-              this.form.rejectReason = ''
-            }
+            // if (!this.showReason && this.form.rejectReason) {
+            //   this.form.rejectReason = ''
+            // }
 
             updateReportHist(this.form).then(response => {
               if (response.code === 200) {
@@ -1137,9 +1208,7 @@ export default {
           //   this.form.rejectReason = this.form.rejectReason.reason
           // }
 
-          if (this.form.rejectReason.length > 0) {
-            this.form.rejectReason = this.form.rejectReason.join(",")
-          }
+          this.form.rejectReason = this.form.rejectReason.join(",")
 
           addReportHist(this.form).then(response => {
             if (response.code === 200) {
@@ -1183,7 +1252,7 @@ export default {
     },
     // 校验
     validateRejectReason (rule, value, cb) {
-      if (this.showReason && !this.form.rejectReason) {
+      if (this.showReason && this.form.rejectReason.length === 0) {
         cb(new Error('不良原因不能为空'))
       }
       cb()
