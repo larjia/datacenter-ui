@@ -215,10 +215,10 @@
           </el-col>
 
           <el-col :span="8" :xs="{span:24, offset:0}">
-            <el-form-item label="起始时间" prop="startTime">
+            <el-form-item label="起始时间">
               <!-- <el-col :span="8" :xs="{span:24, offset:0}"> -->
               <el-time-select
-                v-model="form.startTime"
+                v-model="startTime"
                 :picker-options="{
                   start: '00:00',
                   step: '00:30',
@@ -233,9 +233,9 @@
 
           <el-col :span="8" :xs="{span:24, offset:0}"> 
               <!-- <el-col :span="8" :offset="2" :xs="{span:24, offset:0}"> -->
-            <el-form-item label="至" prop="endTime">
+            <el-form-item label="至">
               <el-time-select
-                v-model="form.endTime"
+                v-model="endTime"
                 :picker-options="{
                   start: '00:00',
                   step: '00:30',
@@ -656,20 +656,24 @@ export default {
       showAddComp: false,
       // 表单参数
       form: {
-        components: [],
-        group: '',
-        op: ''
+        // components: [],
+        // group: '',
+        // op: ''
+        startTime: '',
+        endTime: ''
       },
+      startTime: '',
+      endTime: '',
       // 表单校验
       rules: {
         prodDate: [
           { required: true, message: '生产日期不能为空', trigger: 'blur' }
         ],
         startTime: [
-          { required: true, message: '起始时间不能为空', trigger: 'blur' }
+          { required: true, message: '起始时间不能为空', trigger: ['blur', 'change'] }
         ],
         endTime: [
-          { required: true, message: '结束时间不能为空', trigger: 'blur' }
+          { required: true, message: '结束时间不能为空', trigger: ['blur', 'change'] }
         ],
         partProjName: [
           { required: true, message: '产品名称不能为空', trigger: ['blur', 'change'] }
@@ -814,6 +818,58 @@ export default {
     handleUpdate (row) {
       this.isNew = false
       this.reset()
+      const id = row.id || this.currentRow.id
+      getReportHistById(id).then(response => {
+        this.form = response.data
+
+        this.startTime = this.form.startTime
+        this.endTime = this.form.endTime
+
+        // 分解不良原因列表
+        if (this.form.rejectReason) {
+          this.form.rejectReason = this.form.rejectReason.split(",")
+        }
+        // 加载partOptions
+        this.getPartList(true)
+        // 加载componentOptions
+        this.getComponentList()
+        // return response
+      }).then(() => {
+        // 加载deptOptions
+        listProdDeptAll().then(response => {
+          this.deptOptions = response.data
+          // return response
+        }).then(() => {
+          // 加载班组
+          const dept = this.deptOptions.find(item => item.deptName == this.form.dept)
+          if (dept) {
+            this.groupOptions = dept.groups
+          }
+          // 加载工序
+          const group = this.groupOptions.find(item => item.name == this.form.group)
+          if (group) {
+            this.opOptions = group.ops
+          }
+          // 加载不良原因
+          const op = this.opOptions.find(item => item.name == this.form.op)
+          if (op) {
+            this.needReason = (op.needReason === '1') ? true : false
+            if (this.needReason) {
+              // 加载原因列表
+              this.reasonOptions = op.rejectReasons
+            }
+          }
+
+          this.open = true
+          this.title = '修改报工记录'
+          // this.$forceUpdate()
+        })
+      })
+    },
+    /*
+    handleUpdate (row) {
+      this.isNew = false
+      this.reset()
       // const id = row.id || this.ids
       const id = row.id || this.currentRow.id
       getReportHistById(id).then(response => {
@@ -871,11 +927,12 @@ export default {
       this.open = true
       this.title = '修改报工记录'
     },
+    */
     // 删除按钮操作
     handleDelete (row) {
       // const id = row.id || this.ids
       const id = row.id || this.currentRow.id
-      this.$confirm('是否确认删除?', '警告', {
+      this.$confirm('是否确认删除?' + this.currentRow.operator + ' ' + this.currentRow.partProjName, '警告', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
         type: 'warning'
@@ -919,7 +976,7 @@ export default {
     getDeptList () {
       listProdDeptAll().then(response => {
         this.deptOptions = response.data
-        return response
+        // return response
       })
     },
     // 获取不良原因列表
@@ -1108,10 +1165,29 @@ export default {
       this.opOptions = []
       this.reasonOptions = []
       this.showAddComp = false
+      this.startTime = ''
+      this.endTime = ''
       this.resetForm('form')
+      // this.$forceUpdate()
     },
     // 点击确定按钮
     submit () {
+      if (!this.startTime) {
+        this.$message({
+          showClose: true,
+          message: '开始时间不能为空',
+          type: 'error'
+        })
+        return
+      }
+      if (!this.endTime) {
+        this.$message({
+          showClose: true,
+          message: '结束时间不能为空',
+          type: 'error'
+        })
+        return
+      }
       if (!this.form.group) {
         this.$message({
           showClose: true,
@@ -1136,6 +1212,9 @@ export default {
             this.form.ftq = this.ftq
 
             this.form.rejectReason = this.form.rejectReason.join(",")
+
+            this.form.startTime = this.startTime
+            this.form.endTime = this.endTime
             
             // if (!this.showReason) {
             //   this.form.rejectReason = ''
@@ -1157,11 +1236,16 @@ export default {
             this.form.ppm = this.ppm
             this.form.ftq = this.ftq
 
-            this.form.rejectReason = this.form.rejectReason.join(",")
-
+            if (this.form.rejectReason !== '') {
+              this.form.rejectReason = this.form.rejectReason.join(",")
+            }
+            
             // if (!this.showReason && this.form.rejectReason) {
             //   this.form.rejectReason = ''
             // }
+
+            this.form.startTime = this.startTime
+            this.form.endTime = this.endTime
 
             updateReportHist(this.form).then(response => {
               if (response.code === 200) {
@@ -1178,6 +1262,22 @@ export default {
     },
     // 点击确定并继续添加按钮
     submitContinue () {
+      if (!this.startTime) {
+        this.$message({
+          showClose: true,
+          message: '开始时间不能为空',
+          type: 'error'
+        })
+        return
+      }
+      if (!this.endTime) {
+        this.$message({
+          showClose: true,
+          message: '结束时间不能为空',
+          type: 'error'
+        })
+        return
+      }
       if (!this.form.group) {
         this.$message({
           showClose: true,
@@ -1210,6 +1310,9 @@ export default {
 
           this.form.rejectReason = this.form.rejectReason.join(",")
 
+          this.form.startTime = this.startTime
+          this.form.endTime = this.endTime
+
           addReportHist(this.form).then(response => {
             if (response.code === 200) {
               this.msgSuccess('新增成功')
@@ -1221,8 +1324,8 @@ export default {
               const shift = this.form.shift
               const operator = this.form.operator
               this.handleAdd()
-              this.form.startTime = startTime
-              this.form.endTime = endTime
+              this.startTime = startTime
+              this.endTime = endTime
               this.form.shift = shift
               this.form.operator = operator
             } else {
