@@ -2,61 +2,117 @@
   <div class="app-container">
     <!-- 搜素表单 -->
     <el-form :inline="true">
-      <el-form-item label="生产日期">
-        <el-date-picker
-          v-model="queryParams.prodDate"
-          type="date"
-          placeholder="选择日期"
-          clearable
-          size="small"
-          value-format="yyyy-MM-dd"
-        />
-      </el-form-item>
-      <el-form-item label="物料号">
-        <el-input
-          v-model="queryParams.partNumber"
-          type="text"
-          size="small"
-          clearable
-          placeholder="输入物料号"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button
-          class="filter-item"
-          type="primary"
-          icon="el-icon-search"
-          size="mini"
-          @click="handleQuery"
-        >搜索</el-button>
-        <el-button
-          class="filter-item"
-          type="primary"
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-        >新增</el-button>
-        <el-button
-          type="success"
-          icon="el-icon-edit"
-          size="mini"
-          :disabled='!isSelected'
-          @click="handleUpdate"
-        >修改</el-button>
-        <el-button
-          type="danger"
-          icon="el-icon-delete"
-          size="mini"
-          :disabled='!isSelected'
-          @click="handleDelete"
-        >删除</el-button>
-        <el-button
-          type="warning"
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-        >导出</el-button>
-      </el-form-item>
+      <el-row>
+        <el-form-item label="生产日期">
+          <el-date-picker
+            v-model="dateRange"
+            size="mini"
+            style="width: 240px"
+            value-format="yyyy-MM-dd"
+            type="daterange"
+            range-separator="-"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+          ></el-date-picker>
+        </el-form-item>
+        <!-- <el-form-item label="生产日期">
+          <el-date-picker
+            v-model="queryParams.prodDate"
+            type="date"
+            placeholder="选择日期"
+            clearable
+            size="mini"
+            value-format="yyyy-MM-dd"
+          />
+        </el-form-item> -->
+        <el-form-item label="产品">
+          <el-input
+            v-model="queryParams.partProjName"
+            type="text"
+            size="mini"
+            clearable
+            placeholder="产品名称或物料号"
+          />
+        </el-form-item>
+        <el-form-item label="操作员">
+          <el-input
+            v-model="queryParams.operator"
+            type="text"
+            size="mini"
+            clearable
+            placeholder="操作员"
+          />
+        </el-form-item>
+      </el-row>
+
+      <el-row>
+        <el-form-item label="车间">
+          <el-input
+            v-model="queryParams.dept"
+            type="text"
+            size="mini"
+            clearable
+            placeholder="车间"
+          />
+        </el-form-item>
+        <el-form-item label="班组">
+          <el-input
+            v-model="queryParams.group"
+            type="text"
+            size="mini"
+            clearable
+            placeholder="班组"
+          />
+        </el-form-item>
+        <el-form-item label="工序">
+          <el-input
+            v-model="queryParams.op"
+            type="text"
+            size="mini"
+            clearable
+            placeholder="工序"
+          />
+        </el-form-item>
+      </el-row>
+
+      <el-row>
+        <el-form-item>
+          <el-button
+            class="filter-item"
+            type="primary"
+            icon="el-icon-search"
+            size="mini"
+            @click="handleQuery"
+          >搜索</el-button>
+          <el-button
+            class="filter-item"
+            type="primary"
+            icon="el-icon-plus"
+            size="mini"
+            @click="handleAdd"
+          >新增</el-button>
+          <el-button
+            type="success"
+            icon="el-icon-edit"
+            size="mini"
+            :disabled='!isSelected'
+            @click="handleUpdate"
+          >修改</el-button>
+          <el-button
+            type="danger"
+            icon="el-icon-delete"
+            size="mini"
+            :disabled='!isSelected'
+            @click="handleDelete"
+          >删除</el-button>
+          <el-button
+            type="warning"
+            icon="el-icon-download"
+            size="mini"
+            @click="handleExport"
+          >导出</el-button>
+        </el-form-item>
+      </el-row>
     </el-form>
 
     <!-- 数据表格 -->
@@ -617,9 +673,22 @@ export default {
       // 查询参数
       queryParams: {
         pageNum: 1,
-        pageSize: 10,
-        prodDate: undefined,
-        partNumber: undefined
+        pageSize: 20,
+        // 生产开始日期(选择范围)
+        // prodStartTime: undefined,
+        // 生产结束日期(选择范围)
+        // prodEndTime: undefined,
+        // 产品名称(或物料号)
+        partProjName: undefined,
+        // 操作员
+        operator: undefined,
+        // 车间
+        dept: undefined,
+        // 班组
+        group: undefined,
+        // 工序
+        op: undefined,
+        // prodDate: undefined,
       },
       /**
        * 新增或修改页面数据
@@ -662,8 +731,12 @@ export default {
         startTime: '',
         endTime: ''
       },
+      // 填报时的开始时间和结束时间
+      // startTime, endTime放在data下面, 解决日期选择器不能响应的问题。如果不是放在data下面最顶层,可能会出现UI不响应的问题。
       startTime: '',
       endTime: '',
+      // 查询时的生产日期范围
+      dateRange: [],
       // 表单校验
       rules: {
         prodDate: [
@@ -787,7 +860,7 @@ export default {
       this.loading = true
       // 分页切换重置currentRow
       this.currentRow = null
-      listReportHist(this.queryParams).then(response => {
+      listReportHist(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
         this.reportHistList = response.rows
         this.total = response.total
         this.loading = false
@@ -1446,6 +1519,10 @@ export default {
 .item-title {
   text-align: center;
   margin-top: 5px;
+}
+
+.el-form-item {
+  margin-bottom: 10px;
 }
 
 /* .el-table__row:hover>td {
