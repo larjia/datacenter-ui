@@ -8,3 +8,12 @@ export function getFTQLeakRate (query) {
         params: query
     })
 }
+
+// 导出生产报工数据
+export function exportData (query) {
+    return request({
+      url: '/production/reporting/quality/export',
+      method: 'get',
+      params: query
+    })
+  }

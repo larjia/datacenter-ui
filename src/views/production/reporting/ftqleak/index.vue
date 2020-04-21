@@ -32,6 +32,12 @@
             size="mini"
             @click="generateReport"
           >生成报表</el-button>
+          <el-button
+            type="warning"
+            icon="el-icon-download"
+            size="mini"
+            @click="handleExport"
+          >导出至Excel</el-button>
         </el-form-item>
       </el-row>
     </el-form>
@@ -67,7 +73,7 @@
 </template>
 
 <script>
-import { getFTQLeakRate } from '@/api/production/reporting/quality'
+import { getFTQLeakRate, exportData } from '@/api/production/reporting/quality'
 
 export default {
   name: 'FTQLeak',
@@ -105,6 +111,19 @@ export default {
         this.total = response.total
         this.loading = false
       })
+    },
+    // 导出报表
+    handleExport () {
+      const queryParams = this.queryParams
+      this.$confirm('是否确认导出至Excel?', '信息', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        return exportData(queryParams)
+      }).then(response => {
+        this.download(response.msg)
+      }).catch(function () {})
     }
   },
   filters: {
