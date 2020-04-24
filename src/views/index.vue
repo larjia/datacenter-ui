@@ -13,7 +13,7 @@
 
 <script>
 import BarChart from './dashboard/BarChart'
-import { getFTQLeakRate, getFTQ, getLeakRate } from '@/api/production/reporting/quality'
+// import { getFTQLeakRate, getFTQ, getLeakRate } from '@/api/production/reporting/quality'
 
 export default {
   name: 'Index',
