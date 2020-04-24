@@ -36,9 +36,15 @@
         <el-form-item>
           <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
           <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-          <!-- <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAdd">新增</el-button>
-          <el-button type="success" icon="el-icon-edit" size="mini" @click="handleUpdate">修改</el-button>
-          <el-button type="danger" icon="el-icon-delete" size="mini" @click="handleDelete">删除</el-button> -->
+          <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAdd">新增</el-button>
+          <el-button type="success" icon="el-icon-edit" size="mini" 
+            :disabled="!isSelected"
+            @click="handleUpdate"
+          >修改</el-button>
+          <el-button type="danger" icon="el-icon-delete" size="mini" 
+            :disabled="!isSelected"
+            @click="handleDelete"
+          >删除</el-button>
         </el-form-item>
       </el-row>
     </el-form>
@@ -160,7 +166,7 @@ export default {
   },
   computed: {
     isSelected () {
-      return currentRow == null ? false : true
+      return (this.currentRow == null) ? false : true
     }
   },
   created () {
@@ -232,19 +238,63 @@ export default {
     },
     /** 新增按钮 */
     handleAdd () {
-
+      this.reset()
+      this.open = true
+      this.title = '添加字典数据'
+      this.form.dictType = this.queryParams.dictType
     },
     /** 修改按钮操作 */
     handleUpdate () {
-
+      this.reset()
+      const dictCode = this.currentRow.dictCode
+      getData(dictCode).then(response => {
+        this.form = response.data
+        this.open = true
+        this.title = '修改字典数据'
+      })
     },
     /** 删除按钮 */
     handleDelete () {
-
+      const dictCode = this.currentRow.dictCode
+      const dictLabel = this.currentRow.dictLabel
+      this.$confirm('是否确定删除"' + dictLabel + '"字典编码?', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(function () {
+        return delData(dictCode)
+      }).then(() => {
+        this.getList()
+        this.msgSuccess('删除成功')
+      }).catch(function() {})
     },
     /** 提交按钮 */
     submit () {
-
+      this.$refs['form'].validate(valid => {
+        if (valid) {
+          if (this.form.dictCode != undefined) {  // 修改
+            updateData(this.form).then(response => {
+              if (response.code === 200) {
+                this.msgSuccess('修改成功')
+                this.open = false
+                this.getList()
+              } else {
+                this.msgError(response.msg)
+              }
+            })
+          } else {                                // 新增
+            addData(this.form).then(response => {
+              if (response.code === 200) {
+                this.msgSuccess('新增成功')
+                this.open = false
+                this.getList()
+              } else {
+                this.msgError(response.msg)
+              }
+            })
+          }
+        }
+      })
     },
     /** 当前行更改 */
     handleCurrentChange (val) {
