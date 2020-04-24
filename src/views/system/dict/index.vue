@@ -54,7 +54,12 @@
             <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
             <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
             <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAdd">新增</el-button>
-            <el-button type="success" icon="el-icon-edit" size="mini" :disabled="!isSelected" @click="handleUpdate">修改</el-button>
+            <el-button type="success" icon="el-icon-edit" size="mini" 
+              :disabled="!isSelected" 
+              @click="handleUpdate"
+              v-hasPermi="['system:dict:edit']"
+              v-hasRole="['admin']"
+            >修改</el-button>
             <el-button type="danger" icon="el-icon-delete" size="mini" :disabled="!isSelected" @click="handleDelete">删除</el-button>
           </el-form-item>
         </el-col>
