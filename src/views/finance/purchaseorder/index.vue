@@ -9,6 +9,22 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="供应商" prop="supplier">
+        <el-input
+          v-model="queryParams.supplier"
+          placeholder="请输入供应商编码"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="供应商名称" prop="supplierName">
+        <el-input
+          v-model="queryParams.supplierName"
+          placeholder="请输入供应商名称"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
       </el-form-item>
