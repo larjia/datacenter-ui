@@ -120,7 +120,7 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        orderNbr: 'PO165013'
+        orderNbr: undefined
       },
       currentRow: null
     }
