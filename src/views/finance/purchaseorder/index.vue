@@ -93,7 +93,6 @@
           <span>{{ scope.row.taxIn | YesNoFilter }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="税率" align="center" prop="taxRate" />
       <el-table-column label="采购账户" align="center" width="120" prop="purAccount" />
       <el-table-column label="成本中心" align="center" width="120" prop="cc" />
       <el-table-column label="项目" align="center" width="120" prop="project" />
@@ -121,7 +120,7 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        orderNbr: undefined
+        orderNbr: 'PO165013'
       },
       currentRow: null
     }
