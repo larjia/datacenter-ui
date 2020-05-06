@@ -93,6 +93,19 @@ export const constantRoutes = [
         meta: { title: '字典数据', icon: '' }
       }
     ]
+  },
+  {
+    path: '/bpm',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'applicationhist/:appNbr',
+        component: (resolve) => require(['@/views/bpm/applicationhist'], resolve),
+        name: 'BPMApplicationHist',
+        meta: { title: 'BPM申请记录', icon: '' }
+      }
+    ]
   }
 ]
 

@@ -74,7 +74,7 @@
       <el-table-column label="地点" align="center" prop="site" />
       <el-table-column label="申请号" align="center"  width="120" prop="appNbr">
         <template slot-scope="scope">
-          <router-link :to="'/bpm/hist/' + scope.row.appNbr" class="link-type">
+          <router-link :to="'/bpm/applicationhist/' + scope.row.appNbr" class="link-type">
             <span>{{ scope.row.appNbr }}</span>
           </router-link>
         </template>
