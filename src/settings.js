@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'SWL数据中心',
+  title: 'SWL在线报工',
   /**
    * 是否系统布局配置
    */
