@@ -28,13 +28,11 @@
       <el-table-column label="申请号" prop="appNbr" width="100"/>
       <el-table-column label="申请日期" prop="appDate"  width="120"/>
       <el-table-column label="备注" prop="remark" width="250" :show-overflow-tooltip="true"/>
-      <el-table-column label="账户" prop="account" width="100" />
-      <el-table-column label="成本中心" prop="cc" width="100" />
       <el-table-column label="项目" prop="project" width="100" />
+      <el-table-column label="成本中心" prop="cc" width="100" />
+      <el-table-column label="账户" prop="account" width="100" />
       <el-table-column label="行" prop="line" />
       <el-table-column label="物料号" prop="part" width="250" />
-      <el-table-column label="描述" prop="desc" width="250" :show-overflow-tooltip="true"/>
-      <el-table-column label="描述2" prop="desc2" width="200" :show-overflow-tooltip="true"/>
       <el-table-column label="UM" prop="um" />
       <el-table-column label="供应商" prop="supplier" />
       <el-table-column label="货币" prop="currency" />
