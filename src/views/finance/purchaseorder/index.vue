@@ -152,6 +152,7 @@ export default {
     },
     // 搜索操作
     handleQuery () {
+      this.queryParams.pageNum = 1
       this.getList()
     }
   }
