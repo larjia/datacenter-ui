@@ -71,7 +71,7 @@ export default {
       const dd = new Date()
       const end = this.convertDate(dd)
       // const lastDay = today.setTime(today.getTime() - 14 * 24 * 60 * 60 * 1000)
-      dd.setDate(dd.getDate() - 30)
+      dd.setDate(dd.getDate() - 300)
       const start = this.convertDate(dd)
       const query = {
         beginTime: start,
